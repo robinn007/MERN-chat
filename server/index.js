@@ -22,7 +22,7 @@ const io = new SocketServer({
 
 io.attach(server);
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5000;
 
 require('./connection');
 
