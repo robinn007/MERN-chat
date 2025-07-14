@@ -18,9 +18,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import socket from "@/socket";
-import { ModeToggle } from "@/components/mode-toggle";
 import { Label } from "@/components/ui/label";
 import VideoCall from "./call";
+//import { ModeToggle } from "@/components/mode-toggle";
 
 const Chat = () => {
   const [chats, setChats] = useState([]);
@@ -54,7 +54,6 @@ const Chat = () => {
     const res = await fetchData("/chat", "GET", {}, { authorization: `${token}` });
     if (res.status === 200) {
       setChats(res.data);
-      // Log data to inspect structure and check for duplicates
       console.log("Chats data:", res.data);
     }
   };
@@ -186,11 +185,11 @@ const Chat = () => {
       return (
         <Dialog>
           <DialogTrigger>
-            <div className="w-32 h-32 bg-green-100 p-2">
+            <div className="w-32 h-32 bg-green-100 dark:bg-green-900 p-2 rounded-lg">
               <img
                 src={`data:image/${fileType};base64,${fileBuffer}`}
                 alt={fileName}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded"
               />
             </div>
           </DialogTrigger>
@@ -212,13 +211,14 @@ const Chat = () => {
 
     return (
       <div className="flex items-center gap-2">
-        <FileIcon className="w-8 h-8" />
+        <FileIcon className="w-8 h-8 text-foreground" />
         <a
           href={`data:application/octet-stream;base64,${fileBuffer}`}
           download={fileName}
         >
           <Button>
-            <Download /> {fileName.length > 15 ? fileName.slice(0, 15) + "..." : fileName}
+            <Download className="mr-2 h-4 w-4" /> 
+            {fileName.length > 15 ? fileName.slice(0, 15) + "..." : fileName}
           </Button>
         </a>
       </div>
@@ -226,33 +226,33 @@ const Chat = () => {
   };
 
   return !isCalling && !receiverSocketId ? (
-    <div className="flex w-screen">
+    <div className="flex w-screen h-screen bg-background text-foreground">
       <div
         className={`${isMobile && chatId && "hidden"} flex flex-col ${
           !isMobile && "border-r"
-        } border-white ${isMobile ? "w-full" : "w-[30%]"} h-screen`}
+        } border-border ${isMobile ? "w-full" : "w-[30%]"} h-screen bg-background`}
       >
-        <div className="flex justify-between border-b border-white w-full px-5 py-2">
-          <h1 className="text-3xl font-semibold">Chats</h1>
-          <ModeToggle />
+        <div className="flex justify-between border-b border-border w-full px-5 py-2 bg-background">
+          <h1 className="text-3xl font-semibold text-foreground">Chats</h1>
+          {/* <ModeToggle /> */}
         </div>
 
-        <div className="flex flex-col px-5 py-2 gap-5 mt-5">
+        <div className="flex flex-col px-5 py-2 gap-5 mt-5 overflow-y-auto">
           {chats?.Chats?.flatMap((chatGroup) =>
             chatGroup?.connectedUsers?.map((chat, index) => (
               <div
-                key={`${chat._id}-${index}`} // Ensure unique key by combining _id and index
-                className="flex flex-col gap-1 cursor-pointer"
+                key={`${chat._id}-${index}`}
+                className="flex flex-col gap-1 cursor-pointer p-3 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
                 onClick={() => {
                   setChatId(chat._id);
                   setRecieverId(chat.user);
                 }}
               >
                 <div className="flex justify-between">
-                  <h2 className="text-xl font-semibold">{chat.name}</h2>
-                  <p className="text-sm">{chat.lastMessageTime}</p>
+                  <h2 className="text-xl font-semibold text-foreground">{chat.name}</h2>
+                  <p className="text-sm text-muted-foreground">{chat.lastMessageTime}</p>
                 </div>
-                <p className="text-sm">{chat.lastMessage}</p>
+                <p className="text-sm text-muted-foreground">{chat.lastMessage}</p>
               </div>
             ))
           )}
@@ -264,7 +264,7 @@ const Chat = () => {
               className={`fixed bottom-4 ${isMobile ? "right-4" : "right-[72%]"} cursor-pointer`}
               onClick={() => setOpen(true)}
             >
-              <PlusCircleIcon className="w-[50px] h-[50px]" />
+              <PlusCircleIcon className="w-[50px] h-[50px] text-primary hover:text-primary/80 transition-colors" />
             </div>
           </DialogTrigger>
           <DialogContent>
@@ -285,26 +285,37 @@ const Chat = () => {
       </div>
 
       {chatId && (
-        <div className={`flex flex-col ${isMobile ? "w-full" : "w-[70%]"} h-screen`}>
-          <div className="flex justify-between items-center border-b border-white w-full px-5 py-2.5">
-            <h1 className="flex gap-2 items-center text-2xl font-semibold">
-              {isMobile && <ArrowLeft onClick={() => setChatId("")} />} {recieverName}
+        <div className={`flex flex-col ${isMobile ? "w-full" : "w-[70%]"} h-screen bg-background`}>
+          <div className="flex justify-between items-center border-b border-border w-full px-5 py-2.5 bg-background">
+            <h1 className="flex gap-2 items-center text-2xl font-semibold text-foreground">
+              {isMobile && (
+                <ArrowLeft 
+                  className="cursor-pointer hover:text-primary transition-colors" 
+                  onClick={() => setChatId("")} 
+                />
+              )} 
+              {recieverName}
             </h1>
             <div className="flex gap-5">
-              <VideoIcon className="cursor-pointer" onClick={initiateCall} />
+              <VideoIcon 
+                className="cursor-pointer text-primary hover:text-primary/80 transition-colors" 
+                onClick={initiateCall} 
+              />
             </div>
           </div>
 
-          <div className="flex flex-col w-full gap-5 px-5 py-2 h-[80vh] overflow-auto">
+          <div className="flex flex-col w-full gap-5 px-5 py-2 h-[80vh] overflow-auto bg-background">
             {messages.map((message, index) => (
               <div
-                key={`${message._id}-${index}`} // Ensure unique key for messages
+                key={`${message._id}-${index}`}
                 className={`w-full flex ${message.recieverId === recieverId ? "justify-end" : ""}`}
               >
                 {message.message && (
                   <p
                     className={`text-lg py-2 px-4 rounded-md max-w-[60%] ${
-                      message.recieverId === recieverId ? "text-right bg-blue-400" : "bg-orange-400"
+                      message.recieverId === recieverId 
+                        ? "text-primary-foreground bg-primary ml-auto" 
+                        : "text-secondary-foreground bg-secondary"
                     }`}
                   >
                     {message.message}
@@ -315,10 +326,10 @@ const Chat = () => {
             ))}
           </div>
 
-          <div className="flex gap-2 px-5 py-2">
+          <div className="flex gap-2 px-5 py-2 border-t border-border bg-background">
             <div className="flex items-center">
-              <Label htmlFor="file">
-                <PaperclipIcon />
+              <Label htmlFor="file" className="cursor-pointer">
+                <PaperclipIcon className="text-muted-foreground hover:text-foreground transition-colors" />
               </Label>
               <Input
                 id="file"
@@ -331,6 +342,7 @@ const Chat = () => {
               placeholder="Type a message"
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
+              className="flex-1"
             />
 
             <Dialog open={previewDialog} onOpenChange={setPreviewDialog}>
@@ -341,12 +353,12 @@ const Chat = () => {
                       <img
                         src={URL.createObjectURL(selectedFile)}
                         alt="preview"
-                        className="w-32 h-32 object-cover mb-2"
+                        className="w-32 h-32 object-cover mb-2 rounded"
                       />
                     ) : (
-                      <FileIcon className="w-16 h-16 mb-2" />
+                      <FileIcon className="w-16 h-16 mb-2 text-muted-foreground" />
                     )}
-                    <p className="text-sm font-semibold">{selectedFile.name}</p>
+                    <p className="text-sm font-semibold text-foreground">{selectedFile.name}</p>
 
                     <div className="flex gap-2 mt-4">
                       <Button variant="secondary" onClick={handleRemoveFile}>

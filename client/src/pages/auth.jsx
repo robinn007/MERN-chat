@@ -9,7 +9,7 @@ import { BeatLoader } from "react-spinners";
 const Auth = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("user2@gmail.com");
+  const [email, setEmail] = useState("user@gmail.com");
   const [password, setPassword] = useState("user1234");
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
